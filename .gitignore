@@ -1,2 +1,22 @@
 *.class
 *.log
+target
+ideatarget
+.target
+bin
+# sbt specific
+.cache
+.history
+.cache-main
+.cache-tests
+.classpath
+.project
+.tmpBin
+.factorypath
+.settings
+logs
+.idea
+dist
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
