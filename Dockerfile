@@ -27,7 +27,7 @@ RUN cd /tmp/build && \
   (sbt test:compile || sbt test:compile || sbt test:compile) && \
   rm -rf /tmp/build
 
-EXPOSE 9000  
+EXPOSE 9000:9000 
 WORKDIR /lagomjourney
 RUN ls
 RUN pwd
@@ -35,4 +35,4 @@ RUN sbt sbtVersion
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
-EXPOSE 9000  
+EXPOSE 9000:9000
