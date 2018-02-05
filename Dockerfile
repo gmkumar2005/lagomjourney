@@ -35,4 +35,4 @@ RUN sbt sbtVersion
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
-
+EXPOSE 9000  
