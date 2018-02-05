@@ -29,6 +29,8 @@ RUN cd /tmp/build && \
 
   
 WORKDIR /lagomjourney
+CMD ["pwd"]
+CMD ["ls"]
 CMD ["sbt","runAll"]
 
 EXPOSE 9000
