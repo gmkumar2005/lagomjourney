@@ -27,6 +27,8 @@ RUN cd /tmp/build && \
   (sbt test:compile || sbt test:compile || sbt test:compile) && \
   rm -rf /tmp/build
 
-EXPOSE 9000
-
+  
+WORKDIR /lagomjourney
 CMD ["sbt","runAll"]
+
+EXPOSE 9000
