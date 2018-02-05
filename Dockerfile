@@ -27,4 +27,6 @@ RUN cd /tmp/build && \
   (sbt test:compile || sbt test:compile || sbt test:compile) && \
   rm -rf /tmp/build
 
+EXPOSE 9000
+
 CMD ["sbt","runAll"]
