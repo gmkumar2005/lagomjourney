@@ -28,7 +28,7 @@ RUN cd /tmp/build && \
   rm -rf /tmp/build
 
 EXPOSE 9000:9000 
-WORKDIR /lagomjourney
+# WORKDIR /lagomjourney
 RUN ls
 RUN pwd
 RUN sbt sbtVersion 
