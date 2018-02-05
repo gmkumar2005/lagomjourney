@@ -22,16 +22,19 @@ RUN apk add --update bash curl openssl ca-certificates && \
 COPY . /tmp/build/
 
 # sbt sometimes failed because of network. retry 3 times.
-RUN cd /tmp/build && \
-  (sbt compile || sbt compile || sbt compile) && \
-  (sbt test:compile || sbt test:compile || sbt test:compile) && \
-  rm -rf /tmp/build
+# RUN cd /tmp/build && \
+#  (sbt compile || sbt compile || sbt compile) && \
+#  (sbt test:compile || sbt test:compile || sbt test:compile) && \
+#  rm -rf /tmp/build
 
+COPY . /lagomjourney
 EXPOSE 9000:9000 
-# WORKDIR /lagomjourney
+WORKDIR /lagomjourney
 RUN ls
 RUN pwd
+RUN which sbt 
 RUN sbt sbtVersion 
+RUN sbt runAll  
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
