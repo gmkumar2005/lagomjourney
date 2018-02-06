@@ -38,4 +38,4 @@ RUN setsid nohup sbt runAll &
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
-# EXPOSE 9000:9000
+EXPOSE 9000:9000
