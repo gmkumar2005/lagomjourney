@@ -19,7 +19,7 @@ RUN apk add --update bash curl openssl ca-certificates && \
   rm -rf /tmp/* /var/cache/apk/*
 
 # Prebuild with sbt
-COPY . /tmp/build/
+# COPY . /tmp/build/
 
 # sbt sometimes failed because of network. retry 3 times.
 # RUN cd /tmp/build && \
@@ -38,4 +38,4 @@ RUN sbt runAll
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
-EXPOSE 9000:9000
+# EXPOSE 9000:9000
