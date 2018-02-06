@@ -34,7 +34,7 @@ RUN ls
 RUN pwd
 RUN which sbt 
 RUN sbt sbtVersion 
-RUN setsid nohup sbt runAll 
+RUN setsid nohup sbt lagomCassandraStart lagomServiceLocatorStart lagomRun &
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
