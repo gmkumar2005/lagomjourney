@@ -34,8 +34,8 @@ RUN ls
 RUN pwd
 RUN which sbt 
 RUN sbt sbtVersion 
-RUN setsid nohup sbt runAll & 
+RUN setsid nohup sbt runAll 
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
-EXPOSE 9000:9000
+
