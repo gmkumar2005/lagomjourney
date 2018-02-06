@@ -34,7 +34,7 @@ RUN ls
 RUN pwd
 RUN which sbt 
 RUN sbt sbtVersion 
-RUN sbt runAll  
+RUN setsid nohup sbt runAll & 
 # CMD ["pwd"]
 # CMD ["ls"]
 # CMD ["sbt","runAll"]
