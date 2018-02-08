@@ -187,13 +187,13 @@ class OrderServiceImpl(registry: PersistentEntityRegistry)
 
     val orderIdUUId = Try({
       UUID.fromString(orderId)
-    }).getOrElse(throw InvalidIdentifierException("Invalid Conference ID : " + orderId))
+    }).getOrElse(throw InvalidIdentifierException(s"Invalid Conference ID : ${orderId}"))
 
     entityRef(orderIdUUId)
       .ask(ReadOrderCommand)
       .map {
         case Some(order) => convertOrder(order)
-        case None => throw NotFound("Order with : " + orderId + " not found")
+        case None => throw NotFound(s"Order with :  ${orderId}   not found")
       }
   }
 
@@ -218,19 +218,18 @@ class OrderServiceImpl(registry: PersistentEntityRegistry)
     val orderRecievedDateTime = DateTime.now
     val conferenceUUID = Try({
       UUID.fromString(conferenceId)
-    }).getOrElse(throw InvalidIdentifierException("Invalid Conference ID"))
+    }).getOrElse(throw InvalidIdentifierException(s"Invalid Conference ID"))
     val orderIdUUID = Try({
       UUID.fromString(orderId)
-    }).getOrElse(throw InvalidIdentifierException("Invalid Order ID"))
+    }).getOrElse(throw InvalidIdentifierException(s"Invalid Order ID"))
     val registrantReq = RegistrantReq(registrantInfo.registrantEmail,registrantInfo.registrantSecondaryEmail,registrantInfo.registrantFirstName,registrantInfo.registrantLastname)
-    log.debug("Order creted with orderID :  {}", orderId.toString)
-
+    log.debug(s"Order created with orderID :  ${orderId.toString}")
     for {
       _ <- entityRef(orderIdUUID).ask(UpdateRegistrantCMD(registrantReq))
     } yield {
       val responseHeader = ResponseHeader.Ok.withStatus(201)
         .withHeader("Location", orderId.toString)
-      log.debug("Updted the createdOrderId.toString : {} ", orderId.toString)
+      log.debug(s"Updated the createdOrderId.toString : ${orderId.toString}")
       (responseHeader, orderId.toString)
     }
 

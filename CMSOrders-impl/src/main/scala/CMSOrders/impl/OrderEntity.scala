@@ -40,7 +40,7 @@ class OrderEntity extends PersistentEntity {
       case (AttendeesAdded(attendee), _) => Some(orderReq.addAttendees(Seq(attendee)))
     }.onEvent {
       case (RegistrantUpdated(registrantReq), _) => Some(orderReq.updateRegistrantInfo(registrantReq))
-    }.orElse(ProcessReadOrderCommand)
+    }.orElse(processReadOrderCommand)
   }
 
   override def behavior = {
@@ -51,7 +51,7 @@ class OrderEntity extends PersistentEntity {
 
   }
 
-  private val ProcessReadOrderCommand = Actions().onReadOnlyCommand[ReadOrderCommand.type, Option[OrderReq]] {
+  private val processReadOrderCommand = Actions().onReadOnlyCommand[ReadOrderCommand.type, Option[OrderReq]] {
     case (ReadOrderCommand, ctx, state) => ctx.reply(state)
   }
   private val orderNotCreated = {
@@ -60,7 +60,7 @@ class OrderEntity extends PersistentEntity {
         ctx.thenPersist(OrderPlaced(createOrderCMD))(_ => ctx.reply(Done))
     }.onEvent {
       case (OrderPlaced(orderReq), state) => Some(orderReq)
-    }.orElse(ProcessReadOrderCommand)
+    }.orElse(processReadOrderCommand)
   }
 
 
@@ -117,9 +117,7 @@ case class Attendee(
                      firstName: Option[String],
                      lastName: Option[String],
                      seatNumber: Option[Int]
-                   ) {
-
-}
+                   )
 
 object Attendee {
   implicit val format: Format[Attendee] = Json.format
@@ -128,7 +126,7 @@ object Attendee {
 case class RegistrantReq(registrantEmail: String,
                          registrantSecondaryEmail: String,
                          registrantFirstName: Option[String],
-                         registrantLastname: Option[String]) {}
+                         registrantLastname: Option[String])
 
 object RegistrantReq {
   implicit val format: Format[RegistrantReq] = Json.format

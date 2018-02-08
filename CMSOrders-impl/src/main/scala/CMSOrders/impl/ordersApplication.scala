@@ -27,9 +27,7 @@ trait OrderComponents extends LagomServerComponents
 abstract class OrderApplication(context: LagomApplicationContext) extends LagomApplication(context)
   with OrderComponents
   with AhcWSComponents
-  with LagomKafkaComponents {
-
-}
+  with LagomKafkaComponents
 
 class OrdersApplicationLoader extends LagomApplicationLoader {
   override def loadDevMode(context: LagomApplicationContext): LagomApplication =

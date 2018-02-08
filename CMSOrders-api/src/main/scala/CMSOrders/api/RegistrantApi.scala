@@ -16,12 +16,12 @@ import CMSOrders.model.{Attendee, Order, Registrant}
 import akka.{Done, NotUsed}
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
-
+import Service._
 trait RegistrantApi extends Service {
 
 
   final override def descriptor = {
-    import Service._
+
     named("RegistrantApi").withCalls(
       restCall(Method.PUT, "/orders/:conferenceId/:orderId/attendee", addAttendees _),
       restCall(Method.POST, "/orders/:conferenceId", createOrder _),

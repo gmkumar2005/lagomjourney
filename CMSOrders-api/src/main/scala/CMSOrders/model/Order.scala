@@ -35,14 +35,12 @@ case class Order(
                   createdDate: Option[DateTime],
                   attendees: Option[Seq[Attendee]],
                   status: Option[OrderStatusEnum.OrderStatusEnum]
-                ) {
-  //  def safeId = orderId.getOrElse(UUID.randomUUID())
-}
+                )
 
 case class Registrant(registrantEmail: String,
                       registrantSecondaryEmail: String,
                       registrantFirstName: Option[String],
-                      registrantLastname: Option[String]) {}
+                      registrantLastname: Option[String])
 
 object Registrant {
   implicit val format: Format[Registrant] = Json.format

@@ -14,7 +14,6 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{Future, Promise}
 //import play.api.libs.json.Json
-import play.api.libs.json.Json
 
 /**
   *
@@ -64,23 +63,30 @@ class OrderServiceImplIntegrationTest extends AsyncWordSpec with Matchers with B
 
       for {
         created <- createOrderReq(order1)
-        retrieved <- retrieveOrder(created._2)
+        retrieved <- retrieveOrder(created match { case (responseheader, createdOrderId) => createdOrderId case _ => "ORDER CREATION FAILED" })
       } yield {
-//        val jsonString = Json.toJson(retrieved)
-//        val prettyJson = Json.prettyPrint(jsonString)
-//        println("retrieved Order : ")
-//        println(prettyJson)
+        //        val jsonString = Json.toJson(retrieved)
+        //        val prettyJson = Json.prettyPrint(jsonString)
+        //        println("retrieved Order : ")
+        //        println(prettyJson)
 
-        created._2 should ===(retrieved.orderId.getOrElse("UnKnownOrderID").toString)
+        created match {
+          case (responseheader, createdOrderId) => createdOrderId should ===(retrieved.orderId.getOrElse("UnKnownOrderID").toString)
+          case _ => fail("ORDER CREATION FAILED")
+        }
+
 
         OrderStatusEnum.created.toString should ===(retrieved.status.getOrElse("UnKnownStatus").toString)
 
         val expectedResponseHeader = ResponseHeader.Ok.withStatus(201)
           .withHeader("Location", retrieved.orderId.getOrElse("UnKnownOrderID").toString)
 
-        expectedResponseHeader.status should ===(created._1.status)
 
-        created._1.getHeader("Location") should ===(expectedResponseHeader.getHeader("Location"))
+        created match {
+          case (responseheader, createdOrderId) => responseheader.getHeader("Location") should ===(expectedResponseHeader.getHeader("Location"))
+          case _ => fail("ORDER CREATION FAILED")
+        }
+
       }
     }
 
@@ -88,23 +94,37 @@ class OrderServiceImplIntegrationTest extends AsyncWordSpec with Matchers with B
 
       for {
         created <- createOrderReq(order1)
-        retrieved <- retrieveOrder(created._2)
+        retrieved <- retrieveOrder(created match { case (responseheader, createdOrderId) => createdOrderId case _ => "ORDER CREATION FAILED" })
         _ <- addAttendees(addtionalAttendee, retrieved)
         _ <- addAttendees(addtionalAttendee2, retrieved)
-        afterAddAttendee <- retrieveOrder(created._2)
+        afterAddAttendee <- retrieveOrder(created match { case (responseheader, createdOrderId) => createdOrderId case _ => "ORDER CREATION FAILED" })
       } yield {
         //        val jsonString = Json.toJson(afterAddAttendee)
         //        val prettyJson = Json.prettyPrint(jsonString)
         //        println("retrieved Order afterAddAttendee : ")
         //        println(prettyJson)
-        created._2 should ===(retrieved.orderId.getOrElse("UnKnownOrderID").toString)
+        created match {
+          case (responseheader, createdOrderId) => createdOrderId should ===(retrieved.orderId.getOrElse("UnKnownOrderID").toString)
+          case _ => fail("ORDER CREATION FAILED")
+        }
+
+
         OrderStatusEnum.created.toString should ===(retrieved.status.getOrElse("UnKnownStatus").toString)
 
         val expectedResponseHeader = ResponseHeader.Ok.withStatus(201)
           .withHeader("Location", retrieved.orderId.getOrElse("UnKnownOrderID").toString)
 
-        expectedResponseHeader.status should ===(created._1.status)
-        created._1.getHeader("Location") should ===(expectedResponseHeader.getHeader("Location"))
+
+        created match {
+          case (responseheader, createdOrderId) => expectedResponseHeader.status should ===(responseheader.status)
+          case _ => fail("ORDER CREATION FAILED")
+        }
+
+        created match {
+          case (responseheader, createdOrderId) => responseheader.getHeader("Location") should ===(expectedResponseHeader.getHeader("Location"))
+          case _ => fail("ORDER CREATION FAILED")
+        }
+
         //        afterAddAttendee.attendees.getOrElse("EMPTYLIST") should === (Seq(addtionalAttendee,addtionalAttendee2))
         afterAddAttendee.attendees.getOrElse(Seq("EMPTYLIST")) should contain(addtionalAttendee)
         afterAddAttendee.attendees.getOrElse(Seq("EMPTYLIST")) should contain(addtionalAttendee2)
@@ -112,7 +132,7 @@ class OrderServiceImplIntegrationTest extends AsyncWordSpec with Matchers with B
     }
 
 
-    }
+  }
 
 
   private def createOrderReq(order: CMSOrders.model.Order) = {
