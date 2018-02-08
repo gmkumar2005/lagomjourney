@@ -9,3 +9,4 @@ addSbtPlugin("com.lightbend.lagom" % "lagom-sbt-plugin" % "1.4.0-RC1")
 // The ConductR plugin
 addSbtPlugin("com.lightbend.conductr" % "sbt-conductr" % "2.5.1")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
+addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.3.11")
