@@ -3,6 +3,12 @@ scala:
    - 2.12.4
 script:
   - sbt clean coverage test coverageReport
+  - find $HOME/.sbt -name "*.lock" | xargs rm
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - $HOME/.sbt
+    - $HOME/.ivy2
