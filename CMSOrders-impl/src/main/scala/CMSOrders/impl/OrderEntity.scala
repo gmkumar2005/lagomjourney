@@ -7,15 +7,21 @@ import akka.Done
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag, PersistentEntity}
 import org.joda.time.DateTime
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.{Format, Json, Reads, Writes}
+
 //import play.api.libs.json.JodaWrites._
 //import play.api.libs.json.JodaReads._
+
 import play.api.libs.json.JodaWrites._
 import play.api.libs.json.JodaReads._
 
 
-class OrderEntity extends PersistentEntity {
 
+
+class OrderEntity extends PersistentEntity {
+  private final val log: Logger =
+    LoggerFactory.getLogger(classOf[OrderEntity])
   override type Command = OrderCommand
   override type Event = OrderEvent
   override type State = Option[OrderReq]
@@ -23,18 +29,26 @@ class OrderEntity extends PersistentEntity {
   override def initialState: Option[OrderReq] = None
 
   def processCreatedOrders(orderReq: OrderReq): OrderEntity.this.Actions = {
+    log.debug(" orderReqId " + orderReq.orderId.toString + "Status " + orderReq.status )
     Actions().onCommand[AddAttendeesCMD, Done] {
       case (AddAttendeesCMD(attendee), ctx, state) =>
         ctx.thenPersist(AttendeesAdded(attendee))(_ => ctx.reply(Done))
+    }.onCommand[UpdateRegistrantCMD, Done] {
+      case (UpdateRegistrantCMD(registrantReq), ctx, state) =>
+        ctx.thenPersist(RegistrantUpdated(registrantReq))(_ => ctx.reply(Done))
     }.onEvent {
       case (AttendeesAdded(attendee), _) => Some(orderReq.addAttendees(Seq(attendee)))
-    }
-      .orElse(ProcessReadOrderCommand)
+    }.onEvent {
+      case (RegistrantUpdated(registrantReq), _) => Some(orderReq.updateRegistrantInfo(registrantReq))
+    }.orElse(ProcessReadOrderCommand)
   }
 
   override def behavior = {
+
     case None => orderNotCreated
     case Some(order) if order.status == OrderStatusEnum.created => processCreatedOrders(order)
+    case Some(order) if order.status != OrderStatusEnum.created => processCreatedOrders(order)
+
   }
 
   private val ProcessReadOrderCommand = Actions().onReadOnlyCommand[ReadOrderCommand.type, Option[OrderReq]] {
@@ -63,6 +77,12 @@ case class OrderReq(
                      attendees: Option[Seq[Attendee]],
                      status: OrderStatusEnum.OrderStatusEnum
                    ) {
+  def updateStatus(newStatus: OrderStatusEnum.Value) = {
+    copy(
+      status = newStatus
+    )
+  }
+
 
   def addAttendees(newAttendees: Seq[Attendee]) = {
     assert(status == OrderStatusEnum.created)
@@ -71,10 +91,18 @@ case class OrderReq(
       attendees = Some(updatedAttendees.distinct)
     )
   }
+
+  def updateRegistrantInfo(registrantReq: RegistrantReq) = {
+    assert(status == OrderStatusEnum.created)
+    copy(
+      registrantFirstName = registrantReq.registrantFirstName,
+      registrantLastname = registrantReq.registrantLastname
+    )
+  }
 }
 
 object OrderStatusEnum extends Enumeration {
-  val created, ready, submitted, reserved, partialReserved, canceled, paid, confirmed = Value
+  val created, ready, submitted, reserved, partialReserved, canceled, paid, confirmed, deleted = Value
   type OrderStatusEnum = Value
   implicit val format: Format[Value] = Format(Reads.enumNameReads(this), Writes.enumNameWrites[OrderStatusEnum.type])
 }
@@ -97,6 +125,15 @@ object Attendee {
   implicit val format: Format[Attendee] = Json.format
 }
 
+case class RegistrantReq(registrantEmail: String,
+                         registrantSecondaryEmail: String,
+                         registrantFirstName: Option[String],
+                         registrantLastname: Option[String]) {}
+
+object RegistrantReq {
+  implicit val format: Format[RegistrantReq] = Json.format
+}
+
 // end of state
 
 // star of commands
@@ -108,11 +145,21 @@ object CreateOrderCMD {
   implicit val format: Format[CreateOrderCMD] = Json.format
 }
 
+
+case class UpdateRegistrantCMD(registrantReq: RegistrantReq) extends OrderCommand with ReplyType[Done]
+
+object UpdateRegistrantCMD {
+  implicit val format: Format[UpdateRegistrantCMD] = Json.format
+}
+
+
 case class AddAttendeesCMD(attendee: Attendee) extends OrderCommand with ReplyType[Done]
 
 object AddAttendeesCMD {
   implicit val format: Format[AddAttendeesCMD] = Json.format
 }
+
+
 
 /**
   * Read one order for a give orderId
@@ -144,6 +191,15 @@ case class AttendeesAdded(attendee: Attendee) extends OrderEvent
 object AttendeesAdded {
   implicit val format: Format[AttendeesAdded] = Json.format
 }
+
+case class RegistrantUpdated(registrantReq: RegistrantReq) extends OrderEvent
+
+object RegistrantUpdated {
+  implicit val format: Format[RegistrantUpdated] = Json.format
+}
+
+
+
 
 // end of events
 

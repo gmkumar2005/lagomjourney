@@ -12,7 +12,7 @@
 
 package CMSOrders.api
 
-import CMSOrders.model.{Attendee, Order}
+import CMSOrders.model.{Attendee, Order, Registrant}
 import akka.{Done, NotUsed}
 import com.lightbend.lagom.scaladsl.api.transport.Method
 import com.lightbend.lagom.scaladsl.api.{Service, ServiceCall}
@@ -23,51 +23,50 @@ trait RegistrantApi extends Service {
   final override def descriptor = {
     import Service._
     named("RegistrantApi").withCalls(
-      restCall(Method.PUT, "/orders/:conferenceId/:orderId/:seatNumber", addAttendees _),
+      restCall(Method.PUT, "/orders/:conferenceId/:orderId/attendee", addAttendees _),
       restCall(Method.POST, "/orders/:conferenceId", createOrder _),
       restCall(Method.DELETE, "/orders/:conferenceId/:orderId", deleteOrder _),
       restCall(Method.GET, "/orders?page&perPage", getOrders _),
       restCall(Method.GET, "/orders/:conferenceId?page&perPage", getOrdersbyConferenceId _),
       restCall(Method.GET, "/orders/:conferenceId/:orderId?page&perPage", getOrdersbyOrderId _),
       restCall(Method.DELETE, "/orders/:conferenceId/:orderId/:seatNumber", ordersConferenceIdOrderIdSeatNumberDelete _),
-      restCall(Method.PUT, "/orders/:conferenceId", updateOrder _)
+      restCall(Method.PUT, "/orders/:conferenceId/:orderId", updateRegistrantInfo _)
     ).withAutoAcl(true)
   }
 
 
   /**
     * Add or update an attendee
-    * Conference id are mandatory for creating an order.  
+    * Conference id are mandatory for creating an order.
     *
-    * @param conferenceId conferenceId  
+    * @param conferenceId conferenceId
     * @param orderId      orderId
-    * @param seatNumber   seatNumber
-    * @return void Body Parameter  Order object 
+    * @return void Body Parameter  Order object
     */
-  def addAttendees(conferenceId: String, orderId: String, seatNumber: String): ServiceCall[Attendee, String]
+  def addAttendees(conferenceId: String, orderId: String): ServiceCall[Attendee, String]
 
   /**
     * Create a new order
-    * Conference id are mandatory for creating an order.  
+    * Conference id are mandatory for creating an order.
     *
-    * @param conferenceId conferenceId 
-    * @return void Body Parameter  Order object 
+    * @param conferenceId conferenceId
+    * @return void Body Parameter  Order object
     */
   def createOrder(conferenceId: String): ServiceCall[Order, String]
 
   /**
     * Delete a order
-    * Deletes  existing orders for a given  conference id and order id. 
+    * Deletes  existing orders for a given  conference id and order id.
     *
-    * @param conferenceId Conference id  
+    * @param conferenceId Conference id
     * @param orderId      Unique orderId
     * @return void
     */
-  def deleteOrder(conferenceId: String, orderId: String): ServiceCall[NotUsed, Done]
+  def deleteOrder(conferenceId: String, orderId: String): ServiceCall[NotUsed, String]
 
   /**
     * Get all Orders
-    * Allows you to retrieve the list of existing orders. 
+    * Allows you to retrieve the list of existing orders.
     *
     * @param page    Page number (optional)
     * @param perPage page size , rows per page (optional)
@@ -77,9 +76,9 @@ trait RegistrantApi extends Service {
 
   /**
     * Get all Orders of a conference
-    * Allows you to retrieve the list of existing orders. 
+    * Allows you to retrieve the list of existing orders.
     *
-    * @param conferenceId Conference id  
+    * @param conferenceId Conference id
     * @param page         Page number (optional)
     * @param perPage      page size , rows per page (optional)
     * @return Seq[Order]
@@ -88,9 +87,9 @@ trait RegistrantApi extends Service {
 
   /**
     * Get  an Order
-    * Allows you to retrieve the list of existing orders by conference id and order id. 
+    * Allows you to retrieve the list of existing orders by conference id and order id.
     *
-    * @param conferenceId Conference id  
+    * @param conferenceId Conference id
     * @param orderId      Unique orderId
     * @param page         Page number (optional)
     * @param perPage      page size , rows per page (optional)
@@ -101,7 +100,7 @@ trait RegistrantApi extends Service {
   /**
     * Remove attendee
     *
-    * @param conferenceId conferenceId  
+    * @param conferenceId conferenceId
     * @param orderId      orderId
     * @param seatNumber   seatNumber
     * @return void
@@ -110,12 +109,12 @@ trait RegistrantApi extends Service {
 
   /**
     * Modify a an order
-    * Conference id are mandatory for creating an order.  
+    * Conference id are mandatory for creating an order.
     *
-    * @param conferenceId conferenceId 
-    * @return void Body Parameter  Order object 
+    * @param conferenceId conferenceId
+    * @return void Body Parameter  Order object
     */
-  def updateOrder(conferenceId: String): ServiceCall[Order, Done]
+  def updateRegistrantInfo(conferenceId: String,orderId: String): ServiceCall[Registrant, String]
 
 
 }

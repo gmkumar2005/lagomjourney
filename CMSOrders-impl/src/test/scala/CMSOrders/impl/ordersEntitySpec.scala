@@ -7,6 +7,7 @@ import com.lightbend.lagom.scaladsl.playjson.JsonSerializerRegistry
 import com.lightbend.lagom.scaladsl.testkit.PersistentEntityTestDriver
 import org.joda.time.DateTime
 import org.scalatest.{BeforeAndAfterAll, Matchers, OptionValues, WordSpec}
+import play.libs.Json
 //import play.api.libs.json.Json
 //import com.github.nscala_money.money.Imports._
 
@@ -58,11 +59,11 @@ class ordersEntitySpec extends WordSpec with Matchers with BeforeAndAfterAll wit
       outcome.state should ===(Some(orderReq1))
 
 
-      //      val outcome2 = driver.run(ReadOrderCommand)
+      val outcome2 = driver.run(ReadOrderCommand)
 
-      //      val jsonString = Json.toJson(outcome2.state)
-      //      val prettyJson = Json.prettyPrint(jsonString)
-      //      println(prettyJson)
+      //            val jsonString = Json.toJson(outcome2.state)
+      //            val prettyJson = Json.prettyPrint(jsonString)
+      //            println("allow creating a order request :: " + prettyJson)
     }
 
     "allow retrieve an order" in withDriver { driver =>
@@ -87,7 +88,24 @@ class ordersEntitySpec extends WordSpec with Matchers with BeforeAndAfterAll wit
 
       val outcome3 = driver.run(AddAttendeesCMD(addtionalAttendee))
       outcome3.events should contain only AttendeesAdded(addtionalAttendee)
+
+      val outcome4 = driver.run(ReadOrderCommand)
+      outcome4.replies should contain only outcome3.state
+//      outcome4.replies.map(x => {
+//        val jsonString = Json.toJson(x)
+//        val prettyJson = Json.prettyPrint(jsonString)
+//        println(" Add attendss :: " + prettyJson)
+//      })
+
     }
 
-  }
+    "allow update registrant details " in withDriver { driver =>
+      val amendedRegistrant = RegistrantReq("myemak@sam.com", "secondaryemai@email.com", Some("kiran"), Some("kumar"))
+      val outcome = driver.run(CreateOrderCMD(orderReq1))
+      outcome.events should contain only OrderPlaced(orderReq1)
+      outcome.state should ===(Some(orderReq1))
+      val outcome1 = driver.run(UpdateRegistrantCMD(amendedRegistrant))
+      outcome1.events should contain only RegistrantUpdated(amendedRegistrant)
+    }
+ }
 }

@@ -11,10 +11,12 @@ object OrderSerializerRegistry extends JsonSerializerRegistry {
     // start of events
     JsonSerializer[OrderPlaced],
     JsonSerializer[AttendeesAdded],
+    JsonSerializer[RegistrantUpdated],
     // end of events
     // start of commands
     JsonSerializer[CreateOrderCMD],
     JsonSerializer[AddAttendeesCMD],
+    JsonSerializer[UpdateRegistrantCMD],
     JsonSerializer[ReadOrderCommand.type],
 
 

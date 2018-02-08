@@ -4,9 +4,9 @@ import java.util.UUID
 
 import CMSOrders.api.RegistrantApi
 import CMSOrders.impl.OrderStatusEnum.OrderStatusEnum
-import CMSOrders.model.Order
+import CMSOrders.model.{Order, Registrant}
 import CMSOrders.util.InvalidIdentifierException
-import akka.Done
+import akka.{Done, NotUsed}
 import com.datastax.driver.core.utils.UUIDs
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.transport.{NotFound, ResponseHeader}
@@ -32,10 +32,9 @@ class OrderServiceImpl(registry: PersistentEntityRegistry)
     *
     * @param conferenceId conferenceId
     * @param orderId      orderId
-    * @param seatNumber   seatNumber
     * @return void Body Parameter  Order object
     */
-  override def addAttendees(conferenceId: String, orderId: String, seatNumber: String): ServiceCall[CMSOrders.model.Attendee, String] =
+  override def addAttendees(conferenceId: String, orderId: String): ServiceCall[CMSOrders.model.Attendee, String] =
     ServerServiceCall { (requestHeader, addtionalAttendee) => {
       val conferenceUUID = Try({
         UUID.fromString(conferenceId)
@@ -156,6 +155,7 @@ class OrderServiceImpl(registry: PersistentEntityRegistry)
       case OrderStatusEnum.ready => Some(CMSOrders.model.OrderStatusEnum.ready)
       case OrderStatusEnum.reserved => Some(CMSOrders.model.OrderStatusEnum.reserved)
       case OrderStatusEnum.submitted => Some(CMSOrders.model.OrderStatusEnum.submitted)
+      case OrderStatusEnum.deleted => Some(CMSOrders.model.OrderStatusEnum.deleted)
       case _ => Some(CMSOrders.model.OrderStatusEnum.created)
     }
   }
@@ -214,7 +214,29 @@ class OrderServiceImpl(registry: PersistentEntityRegistry)
     * @param conferenceId conferenceId
     * @return void Body Parameter  Order object
     */
-  override def updateOrder(conferenceId: String) = ???
+  override def updateRegistrantInfo(conferenceId: String,orderId: String) : ServiceCall[Registrant, String] = ServerServiceCall { (requestHeader, registrantInfo) => {
+    val orderRecievedDateTime = DateTime.now
+    val conferenceUUID = Try({
+      UUID.fromString(conferenceId)
+    }).getOrElse(throw InvalidIdentifierException("Invalid Conference ID"))
+    val orderIdUUID = Try({
+      UUID.fromString(orderId)
+    }).getOrElse(throw InvalidIdentifierException("Invalid Order ID"))
+    val registrantReq = RegistrantReq(registrantInfo.registrantEmail,registrantInfo.registrantSecondaryEmail,registrantInfo.registrantFirstName,registrantInfo.registrantLastname)
+    log.debug("Order creted with orderID :  {}", orderId.toString)
+
+    for {
+      _ <- entityRef(orderIdUUID).ask(UpdateRegistrantCMD(registrantReq))
+    } yield {
+      val responseHeader = ResponseHeader.Ok.withStatus(201)
+        .withHeader("Location", orderId.toString)
+      log.debug("Updted the createdOrderId.toString : {} ", orderId.toString)
+      (responseHeader, orderId.toString)
+    }
+
+  }
+  }
+
 
   private def entityRef(orderId: UUID) = entityRefString(orderId.toString)
 

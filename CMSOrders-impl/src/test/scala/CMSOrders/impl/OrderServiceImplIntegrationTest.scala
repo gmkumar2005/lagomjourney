@@ -111,7 +111,8 @@ class OrderServiceImplIntegrationTest extends AsyncWordSpec with Matchers with B
       }
     }
 
-  }
+
+    }
 
 
   private def createOrderReq(order: CMSOrders.model.Order) = {
@@ -119,7 +120,7 @@ class OrderServiceImplIntegrationTest extends AsyncWordSpec with Matchers with B
   }
 
   private def addAttendees(attendee: CMSOrders.model.Attendee, order: CMSOrders.model.Order) = {
-    orderService.addAttendees(order.conferenceId.toString, order.orderId.getOrElse("UNKNOWNORDERID").toString, "111").invoke(attendee)
+    orderService.addAttendees(order.conferenceId.toString, order.orderId.getOrElse("UNKNOWNORDERID").toString).invoke(attendee)
   }
 
   private def retrieveOrder(orderId: String) = {

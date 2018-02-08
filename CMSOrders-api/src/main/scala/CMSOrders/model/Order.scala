@@ -16,10 +16,16 @@ import java.util.UUID
 
 import org.joda.time.DateTime
 import play.api.libs.json._
-import play.api.libs.json.JodaWrites._
-import play.api.libs.json.JodaReads._
+
 //import play.api.libs.json.JodaWrites._
 //import play.api.libs.json.JodaReads._
+
+
+import play.api.libs.json.JodaWrites._
+import play.api.libs.json.JodaReads._
+
+
+
 case class Order(
                   registrantEmail: String,
                   registrantFirstName: Option[String],
@@ -33,8 +39,17 @@ case class Order(
   //  def safeId = orderId.getOrElse(UUID.randomUUID())
 }
 
+case class Registrant(registrantEmail: String,
+                      registrantSecondaryEmail: String,
+                      registrantFirstName: Option[String],
+                      registrantLastname: Option[String]) {}
+
+object Registrant {
+  implicit val format: Format[Registrant] = Json.format
+}
+
 object OrderStatusEnum extends Enumeration {
-  val created, ready, submitted, reserved, partialReserved, canceled, paid, confirmed = Value
+  val created, ready, submitted, reserved, partialReserved, canceled, paid, confirmed, deleted = Value
   type OrderStatusEnum = Value
   implicit val format: Format[Value] = Format(Reads.enumNameReads(this), Writes.enumNameWrites[OrderStatusEnum.type])
 }
